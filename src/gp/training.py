@@ -13,7 +13,9 @@ import setting as st
 
 class Optimisation(GaussianProcess):
 
-    def __init__(self, simulations: str):
+    def __init__(self, simulations: str, nlhs: int = 10):
+
+        self.nlhs = nlhs
 
         # load the simulations
         self.csv = hp.load_csv('outputs', simulations)
@@ -54,11 +56,11 @@ class Optimisation(GaussianProcess):
         if save:
 
             if not second:
-                hp.store_list(record_details, 'outputs', 'gps_first_details_' + str(st.NLHS))
-                hp.store_list(record_gps, 'outputs', 'gps_first_modules_' + str(st.NLHS))
+                hp.store_list(record_details, 'outputs', 'gps_first_details_' + str(self.nlhs))
+                hp.store_list(record_gps, 'outputs', 'gps_first_modules_' + str(self.nlhs))
 
             else:
-                hp.store_list(record_details, 'outputs', 'gps_second_details_' + str(st.NLHS))
-                hp.store_list(record_gps, 'outputs', 'gps_second_modules_' + str(st.NLHS))
+                hp.store_list(record_details, 'outputs', 'gps_second_details_' + str(self.nlhs))
+                hp.store_list(record_gps, 'outputs', 'gps_second_modules_' + str(self.nlhs))
 
         return record_details
