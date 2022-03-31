@@ -1,6 +1,16 @@
 # setwd('/home/harry/Documents/Oxford/Astrophysics/Projects/MOPED-GP-Expansion/comgp/')
 library(lhs)
-n = 20
+nlhs = seq(10, 100, by = 10)
 d = 6
-X = maximinLHS(n, d)
-write.csv(X, 'lhs/samples_20.csv')
+
+for (n in nlhs){
+	X = maximinLHS(n, d)
+
+	# filename
+	file = paste('lhs/', 'samples_', as.character(n), '.csv', sep ='')
+
+	# write output
+	write.csv(X, file)
+}
+
+
