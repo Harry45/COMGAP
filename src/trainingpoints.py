@@ -20,10 +20,12 @@ class simulations(sp.ScaleDist, sc.moped):
         load_data (bool, optional): Load all the data required for the analysis. Defaults to True.
     """
 
-    def __init__(self, load_data: bool = True):
+    def __init__(self, load_data: bool = True, nlhs: int = 10):
+
+        self.nlhs = nlhs 
 
         sc.moped.__init__(self, load_data)
-        sp.ScaleDist.__init__(self, st.NLHS, st.FACT)
+        sp.ScaleDist.__init__(self, self.nlhs, st.FACT)
 
         # scale the LHS points to the prior
         self.inputs = sp.ScaleDist.scaling(self)
@@ -65,11 +67,11 @@ class simulations(sp.ScaleDist, sc.moped):
             save (bool, optional): [description]. Defaults to True.
         """
 
-        comp_e = torch.zeros((st.NLHS, self.ndim))
+        comp_e = torch.zeros((self.nlhs, self.ndim))
         comp_1 = torch.zeros_like(comp_e)
         comp_2 = torch.zeros_like(comp_e)
 
-        for i in range(st.NLHS):
+        for i in range(self.nlhs):
 
             # compute the exact model, approximate model 1, approximate model 2
             mu_e = sc.moped.theory_only(self, self.inputs[i])
@@ -87,4 +89,4 @@ class simulations(sp.ScaleDist, sc.moped):
 
             with torch.no_grad():
                 df = pd.DataFrame(matrix.numpy(), columns=st.col_names)
-                hp.save_pd_csv(df, 'outputs', 'simulations_' + str(st.NLHS))
+                hp.save_pd_csv(df, 'outputs', 'simulations_' + str(self.nlhs))

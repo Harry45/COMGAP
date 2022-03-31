@@ -5,9 +5,6 @@
 
 import torch
 
-# number of LHS points
-NLHS = 20
-
 # multiplying factor for the prior
 FACT = 5.0
 

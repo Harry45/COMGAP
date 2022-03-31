@@ -13,7 +13,7 @@ import setting as st
 
 class forwardModel(moped):
 
-    def __init__(self, emulator: bool = True, method: str = 'first', variance: bool = False):
+    def __init__(self, emulator: bool = True, method: str = 'first', variance: bool = False, nlhs: int = 10):
 
         moped.__init__(self, True)
 
@@ -34,7 +34,7 @@ class forwardModel(moped):
 
         if self.emulator:
             # load the GPs
-            self.gps = hp.read_list('outputs', 'gps_' + self.method + '_modules_' + str(st.NLHS))
+            self.gps = hp.read_list('outputs', 'gps_' + self.method + '_modules_' + nlhs)
 
         # compress the data
         self.comp_data = moped.compute_coefficients(self, self.data_vec)

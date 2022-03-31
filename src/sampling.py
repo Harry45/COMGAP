@@ -16,11 +16,11 @@ import setting as st
 
 class MCMC(forwardModel, ScaleDist):
 
-    def __init__(self, emulator: bool = True, method: str = 'first', variance: bool = False):
+    def __init__(self, emulator: bool = True, method: str = 'first', variance: bool = False, nlhs: int = 10):
 
         forwardModel.__init__(self, emulator, method, variance)
 
-        ScaleDist.__init__(self, st.NLHS, st.FACT)
+        ScaleDist.__init__(self, nlhs, st.FACT)
 
         self.priors = ScaleDist.distributions(self, st.FACT)
 
