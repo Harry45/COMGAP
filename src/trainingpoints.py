@@ -89,4 +89,4 @@ class simulations(sp.ScaleDist, sc.moped):
 
             with torch.no_grad():
                 df = pd.DataFrame(matrix.numpy(), columns=st.col_names)
-                hp.save_pd_csv(df, 'outputs', 'simulations_' + str(self.nlhs))
+                hp.save_pd_csv(df, 'simulations', 'simulations_' + str(self.nlhs))
