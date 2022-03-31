@@ -8,6 +8,8 @@ import torch
 # multiplying factor for the prior
 FACT = 5.0
 
+GP_PATH = '../gps'
+
 # path for the data
 data_path = '../data/'
 
