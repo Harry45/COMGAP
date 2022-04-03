@@ -18,7 +18,7 @@ class Optimisation(GaussianProcess):
         self.nlhs = nlhs
 
         # load the simulations
-        self.csv = hp.load_csv('outputs', simulations)
+        self.csv = hp.load_csv('simulations', simulations)
 
     def train(self, second: bool = False, jitter: float = 1E-5, xtrans: bool = True, save: bool = False, **kwargs):
 
@@ -38,29 +38,29 @@ class Optimisation(GaussianProcess):
         for i in range(ndim):
 
             # convert to torch tensor
-            y = torch.from_numpy(outputs[:, i])
+            target = torch.from_numpy(outputs[:, i])
 
             # create the GP model
-            GP_module = GaussianProcess(inputs, y, jitter, xtrans)
+            gp_module = GaussianProcess(inputs, target, jitter, xtrans)
 
             # randomly initialise the hyperparameters
             start = torch.randn((inputs.shape[1] + 1,))
 
             # train the GP model
-            d = GP_module.optimisation(parameters=start, **kwargs)
+            results = gp_module.optimisation(parameters=start, **kwargs)
 
             # save the results
-            record_details.append(d)
-            record_gps.append(GP_module)
+            record_details.append(results)
+            record_gps.append(gp_module)
 
         if save:
 
             if not second:
-                hp.store_list(record_details, 'outputs', 'gps_first_details_' + str(self.nlhs))
-                hp.store_list(record_gps, 'outputs', 'gps_first_modules_' + str(self.nlhs))
+                hp.store_list(record_details, st.GP_PATH, 'gps_first_details_' + str(self.nlhs))
+                hp.store_list(record_gps, st.GP_PATH, 'gps_first_modules_' + str(self.nlhs))
 
             else:
-                hp.store_list(record_details, 'outputs', 'gps_second_details_' + str(self.nlhs))
-                hp.store_list(record_gps, 'outputs', 'gps_second_modules_' + str(self.nlhs))
+                hp.store_list(record_details, st.GP_PATH, 'gps_second_details_' + str(self.nlhs))
+                hp.store_list(record_gps, st.GP_PATH, 'gps_second_modules_' + str(self.nlhs))
 
         return record_details

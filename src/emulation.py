@@ -34,7 +34,7 @@ class forwardModel(moped):
 
         if self.emulator:
             # load the GPs
-            self.gps = hp.read_list('outputs', 'gps_' + self.method + '_modules_' + nlhs)
+            self.gps = hp.read_list(st.GP_PATH, 'gps_' + self.method + '_modules_' + str(nlhs))
 
         # compress the data
         self.comp_data = moped.compute_coefficients(self, self.data_vec)

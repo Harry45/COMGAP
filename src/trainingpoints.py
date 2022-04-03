@@ -22,7 +22,7 @@ class simulations(sp.ScaleDist, sc.moped):
 
     def __init__(self, load_data: bool = True, nlhs: int = 10):
 
-        self.nlhs = nlhs 
+        self.nlhs = nlhs
 
         sc.moped.__init__(self, load_data)
         sp.ScaleDist.__init__(self, self.nlhs, st.FACT)
@@ -88,5 +88,5 @@ class simulations(sp.ScaleDist, sc.moped):
             matrix = torch.cat([self.inputs, comp_e, comp_1, comp_2, comp_e - comp_1, comp_e - comp_2], dim=1)
 
             with torch.no_grad():
-                df = pd.DataFrame(matrix.numpy(), columns=st.col_names)
-                hp.save_pd_csv(df, 'simulations', 'simulations_' + str(self.nlhs))
+                data_frame = pd.DataFrame(matrix.numpy(), columns=st.col_names)
+                hp.save_pd_csv(data_frame, 'simulations', 'simulations_' + str(self.nlhs))

@@ -1,6 +1,6 @@
 # setwd('/home/harry/Documents/Oxford/Astrophysics/Projects/MOPED-GP-Expansion/comgp/')
 library(lhs)
-nlhs = seq(10, 100, by = 10)
+nlhs = seq(200, 1000, by = 100)
 d = 6
 
 for (n in nlhs){
@@ -12,5 +12,3 @@ for (n in nlhs){
 	# write output
 	write.csv(X, file)
 }
-
-
