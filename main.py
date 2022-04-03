@@ -36,6 +36,12 @@ def train_and_gps(nlhs: list):
 
 
 def mcmc_runs(nlhs: list, nsamples: int = 10):
+    """Performs MCMC sampling for different number of training points.
+
+    Args:
+        nlhs (list): A list of the number of training points for the emulator.
+        nsamples (int, optional): The number of MCMC samples to generate. Defaults to 10.
+    """
 
     for n_lhs in nlhs:
 
@@ -90,5 +96,5 @@ if __name__ == '__main__':
 
     # NUM_LHS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     NUM_LHS = [200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    train_and_gps(NUM_LHS)
-    # mcmc_runs(NUM_LHS, 10000)
+    # train_and_gps(NUM_LHS)
+    mcmc_runs(NUM_LHS, 10000)
