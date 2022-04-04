@@ -96,7 +96,8 @@ def forward_nuisance(parameters: torch.tensor, light_params: torch.tensor) -> to
 
 
 def forward(parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor) -> torch.tensor:
-    """Calculate the full forward model for the problem. This is the sum of the cosmological function and the nuisance function.
+    """Calculate the full forward model for the problem. This is the sum of the
+    cosmological function and the nuisance function.
 
     - parameters[0]: omega_matter
     - parameters[1]: w_param
