@@ -11,7 +11,9 @@ import torch.autograd
 import setting as st
 
 
-def integration(redshift: torch.tensor, omega_matter: torch.tensor, w_param: torch.tensor) -> torch.tensor:
+def integration(
+    redshift: torch.tensor, omega_matter: torch.tensor, w_param: torch.tensor
+) -> torch.tensor:
     """The cosmological function to integrate.
 
     Args:
@@ -23,10 +25,12 @@ def integration(redshift: torch.tensor, omega_matter: torch.tensor, w_param: tor
         torch.tensor: the value of the cosmological function
     """
 
-    fz = torch.sqrt(omega_matter * (1.0 + redshift) ** 3.0 + (1.0 - omega_matter)
-                    * (1.0 + redshift) ** (3.0 * (1.0 + w_param)))
+    function = torch.sqrt(
+        omega_matter * (1.0 + redshift) ** 3.0
+        + (1.0 - omega_matter) * (1.0 + redshift) ** (3.0 * (1.0 + w_param))
+    )
 
-    return 1.0/fz
+    return 1.0 / function
 
 
 def forward_cosmo(parameters: torch.tensor, redshift: torch.tensor) -> torch.tensor:
@@ -65,7 +69,9 @@ def forward_cosmo(parameters: torch.tensor, redshift: torch.tensor) -> torch.ten
     return int_val
 
 
-def forward_nuisance(parameters: torch.tensor, light_params: torch.tensor) -> torch.tensor:
+def forward_nuisance(
+    parameters: torch.tensor, light_params: torch.tensor
+) -> torch.tensor:
     """Calculates the theoretical model corresponding to the nuisance parameters.
 
     - parameters[0]: absolute magnitude
@@ -90,12 +96,19 @@ def forward_nuisance(parameters: torch.tensor, light_params: torch.tensor) -> to
     else:
         dummy = 0.0
 
-    nuisa_model = parameters[0] + dummy * parameters[1] - parameters[2] * light_params[1] + parameters[3] * light_params[2]
+    nuisa_model = (
+        parameters[0]
+        + dummy * parameters[1]
+        - parameters[2] * light_params[1]
+        + parameters[3] * light_params[2]
+    )
 
     return nuisa_model
 
 
-def forward(parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor) -> torch.tensor:
+def forward(
+    parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor
+) -> torch.tensor:
     """Calculate the full forward model for the problem. This is the sum of the
     cosmological function and the nuisance function.
 
@@ -122,12 +135,16 @@ def forward(parameters: torch.tensor, redshift: torch.tensor, light_params: torc
     cosmo_params = parameters[0:2]
     nuisa_params = parameters[2:]
 
-    model = forward_nuisance(nuisa_params, light_params) + forward_cosmo(cosmo_params, redshift)
+    model = forward_nuisance(nuisa_params, light_params) + forward_cosmo(
+        cosmo_params, redshift
+    )
 
     return model
 
 
-def first_derivative(parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor) -> Tuple[torch.tensor]:
+def first_derivative(
+    parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor
+) -> Tuple[torch.tensor]:
     """Calculate the first derivative of the forward model.
 
     Args:
@@ -148,7 +165,9 @@ def first_derivative(parameters: torch.tensor, redshift: torch.tensor, light_par
     return model, gradient[0]
 
 
-def second_derivative(parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor) -> Tuple[torch.tensor]:
+def second_derivative(
+    parameters: torch.tensor, redshift: torch.tensor, light_params: torch.tensor
+) -> Tuple[torch.tensor]:
     """Calculates the second derivatives of the forward model.
 
     Args:

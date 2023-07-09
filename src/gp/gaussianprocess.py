@@ -13,10 +13,21 @@ import src.gp.transformation as tr
 
 
 class GaussianProcess(tr.PreWhiten):
+    """
+    Gaussian Process class
 
+    Args:
+        inputs (torch.tensor): the inputs to the GP
+        outputs (torch.tensor): the output (target).
+        jitter (float): jitter term for numerical stability.
+        xtrans (bool, optional): Option to prewhiten the inputs. Defaults to True.
+    """
     def __init__(self, inputs: torch.tensor, outputs: torch.tensor, jitter: float, xtrans: bool = True):
 
         # store the relevant informations
+        self.ytrain_std = torch.std(outputs)
+        self.ytrain_mean = torch.mean(outputs)
+        self.ytrain = (outputs - self.ytrain_mean) / self.ytrain_std
         self.ytrain = outputs.view(-1, 1)
         self.jitter = jitter
         self.xtrans = xtrans
@@ -42,6 +53,15 @@ class GaussianProcess(tr.PreWhiten):
         self.alpha = None
 
     def cost(self, parameters: torch.tensor) -> torch.tensor:
+        """
+        Calculates the negative log-likelihood of the GP.
+
+        Args:
+            parameters (torch.tensor): the parameters used to compute the marginal likelihood.
+
+        Returns:
+            torch.tensor: the negative log-marginal lielihood.
+        """
 
         # compute the kernel matrix
         kernel = kn.compute(self.xtrain, self.xtrain, parameters)
@@ -117,37 +137,72 @@ class GaussianProcess(tr.PreWhiten):
         # return the optimised values of the hyperparameters and the loss
         return dictionary
 
-    def mean_prediction(self, testpoint: torch.tensor):
+    def mean_prediction(self, testpoint: torch.tensor) -> torch.tensor:
+        """
+        Calculates the mean prediction of the GP.
 
+        Args:
+            testpoint (torch.tensor): the test point at which we want to compute the prediction.
+
+        Returns:
+            torch.tensor: the mean prediction.
+        """
         testpoint = testpoint.view(-1, 1)
-
         if self.xtrans and self.ndim >= 2:
             testpoint = tr.PreWhiten.x_transformation(self, testpoint)
 
         k_star = kn.compute(self.xtrain, testpoint, self.opt_parameters)
-
         mean = k_star.t() @ self.alpha
-
         mean = mean * self.ytrain_std + self.ytrain_mean
-
         return mean
 
-    def derivatives(self, testpoint, order: int = 1) -> Union[Tuple[torch.tensor, torch.tensor], torch.tensor]:
+    def derivatives(self, testpoint: torch.tensor,
+                    order: int = 1) -> Union[Tuple[torch.tensor, torch.tensor], torch.tensor]:
+        """
+        Calculates the first or first/second derivatives of the function.
+
+        Args:
+            testpoint (torch.tensor): the test point at which we require the derivatives.
+            order (int, optional): the order of the differentiation. Defaults to 1.
+
+        Returns:
+            Union[Tuple[torch.tensor, torch.tensor], torch.tensor]: the first or first/second derivatives.
+        """
 
         assert order in [1, 2], 'The order of the derivatives must be 1 or 2.'
-
         testpoint.requires_grad = True
-
         mean = self.mean_prediction(testpoint)
-
         gradient = torch.autograd.grad(mean, testpoint)
-
         if order == 1:
             return gradient[0]
-
         hessian = torch.autograd.functional.hessian(self.mean_prediction, testpoint)
-
         return gradient[0], hessian
+
+    def scaled_prediction(self, testpoint: torch.tensor,
+                          variance: bool = False) -> Union[Tuple[torch.tensor, torch.tensor], torch.tensor]:
+        """Computes the prediction at a given test point.
+
+        Args:
+            testpoint (torch.tensor): a tensor of the test point
+            variance (bool, optional): if we want to compute the variance as well. Defaults to False.
+
+        Returns:
+            Union[Tuple[torch.tensor, torch.tensor], torch.tensor]: The mean and variance or mean only
+        """
+
+        testpoint = testpoint.view(-1, 1)
+        if self.xtrans and self.ndim >= 2:
+            testpoint = tr.PreWhiten.x_transformation(self, testpoint)
+        k_star = kn.compute(self.xtrain, testpoint, self.opt_parameters.data)
+        mean = k_star.t() @ self.alpha
+        mean = self.ytrain_std * mean + self.ytrain_mean
+
+        if variance:
+            k_star_star = kn.compute(testpoint, testpoint, self.opt_parameters.data)
+            var = k_star_star - k_star.t() @ kn.solve(self.kernel_matrix, k_star)
+            var = self.ytrain_std**2 * var
+            return mean, var
+        return mean
 
     def prediction(self, testpoint: torch.tensor,
                    variance: bool = False) -> Union[Tuple[torch.tensor, torch.tensor], torch.tensor]:

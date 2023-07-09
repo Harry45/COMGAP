@@ -21,7 +21,6 @@ class simulations(sp.ScaleDist, sc.moped):
     """
 
     def __init__(self, load_data: bool = True, nlhs: int = 10):
-
         self.nlhs = nlhs
 
         sc.moped.__init__(self, load_data)
@@ -30,7 +29,9 @@ class simulations(sp.ScaleDist, sc.moped):
         # scale the LHS points to the prior
         self.inputs = sp.ScaleDist.scaling(self)
 
-    def precomputations(self, expansion_point: torch.tensor = None, save: bool = True) -> None:
+    def precomputations(
+        self, expansion_point: torch.tensor = None, save: bool = True
+    ) -> None:
         """Computes the MOPED vectors, the theory, gradient and Hessian at the
         expansion point. These are saved in the matrices/ folder.
 
@@ -41,8 +42,9 @@ class simulations(sp.ScaleDist, sc.moped):
         """
 
         if expansion_point is None:
-
-            print('No expansion point provided. Using the Maximum Likelihood Estimator.')
+            print(
+                "No expansion point provided. Using the Maximum Likelihood Estimator."
+            )
 
             expansion_point = self.mle
 
@@ -54,11 +56,11 @@ class simulations(sp.ScaleDist, sc.moped):
 
         if save:
             with torch.no_grad():
-                hp.store_arrays(moped_vectors.numpy(), 'matrices', 'moped_vectors')
-                hp.store_arrays(mu_0.numpy(), 'matrices', 'mu_0')
-                hp.store_arrays(gradient.numpy(), 'matrices', 'gradient')
-                hp.store_arrays(hessian.numpy(), 'matrices', 'hessian')
-                hp.store_arrays(expansion_point.numpy(), 'matrices', 'expansion_point')
+                hp.store_arrays(moped_vectors.numpy(), "matrices", "moped_vectors")
+                hp.store_arrays(mu_0.numpy(), "matrices", "mu_0")
+                hp.store_arrays(gradient.numpy(), "matrices", "gradient")
+                hp.store_arrays(hessian.numpy(), "matrices", "hessian")
+                hp.store_arrays(expansion_point.numpy(), "matrices", "expansion_point")
 
     def forward(self, save: bool = True) -> None:
         """Run the forward simulations and save the outputs to a csv file in the folder outputs/simulations.
@@ -72,7 +74,6 @@ class simulations(sp.ScaleDist, sc.moped):
         comp_2 = torch.zeros_like(comp_e)
 
         for i in range(self.nlhs):
-
             # compute the exact model, approximate model 1, approximate model 2
             mu_e = sc.moped.theory_only(self, self.inputs[i])
             mu_1 = sc.moped.approximate_theory(self, self.inputs[i], second=False)
@@ -84,9 +85,13 @@ class simulations(sp.ScaleDist, sc.moped):
             comp_2[i] = sc.moped.compute_coefficients(self, mu_2)
 
         if save:
-
-            matrix = torch.cat([self.inputs, comp_e, comp_1, comp_2, comp_e - comp_1, comp_e - comp_2], dim=1)
+            matrix = torch.cat(
+                [self.inputs, comp_e, comp_1, comp_2, comp_e - comp_1, comp_e - comp_2],
+                dim=1,
+            )
 
             with torch.no_grad():
                 data_frame = pd.DataFrame(matrix.numpy(), columns=st.col_names)
-                hp.save_pd_csv(data_frame, 'simulations', 'simulations_' + str(self.nlhs))
+                hp.save_pd_csv(
+                    data_frame, "simulations", "simulations_" + str(self.nlhs)
+                )

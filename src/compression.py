@@ -10,7 +10,6 @@ import src.model as sm
 
 
 class moped(sm.AppMag):
-
     def __init__(self, load_data: bool = True):
         sm.AppMag.__init__(self, load_data)
 
@@ -41,21 +40,20 @@ class moped(sm.AppMag):
         moped_vectors = torch.zeros_like(grad)
 
         for i in range(self.ndim):
-
             # the first MOPED vector easy to compute
             if i == 0:
                 moped_vectors[:, i] = sol[:, 0] / torch.sqrt(grad[:, 0].t() @ sol[:, 0])
 
             else:
-
                 # create empty matrices to store pre-computations for the MOPED vectors
                 dum_num = torch.zeros((self.ndata, i))
                 dum_den = torch.zeros((i))
 
                 for j in range(i):
-
-                    dum_num[:, j] = (grad[:, i] @ moped_vectors[:, j]) * moped_vectors[:, j]
-                    dum_den[j] = (grad[:, i].t() @ moped_vectors[:, j])**2
+                    dum_num[:, j] = (grad[:, i] @ moped_vectors[:, j]) * moped_vectors[
+                        :, j
+                    ]
+                    dum_den[j] = (grad[:, i].t() @ moped_vectors[:, j]) ** 2
 
                 # the numerator
                 moped_num = sol[:, i] - torch.sum(dum_num, dim=1)
@@ -70,7 +68,7 @@ class moped(sm.AppMag):
         for i in range(self.ndim):
             for j in range(i + 1):
                 prod = moped_vectors[:, i].t() @ self.data_cov @ moped_vectors[:, j]
-                print(f'{i} {j} : {prod.item():7.4f}')
+                print(f"{i} {j} : {prod.item():7.4f}")
 
         # store the MOPED vectors
         self.moped_vectors = moped_vectors
@@ -90,8 +88,8 @@ class moped(sm.AppMag):
             torch.tensor: The MOPED coefficients, of size ndim.
         """
 
-        if not hasattr(self, 'moped_vectors'):
-            raise Exception('MOPED vectors have not been computed.')
+        if not hasattr(self, "moped_vectors"):
+            raise Exception("MOPED vectors have not been computed.")
 
         moped_coefficients = self.moped_vectors.t() @ vector
 

@@ -25,9 +25,9 @@ def train_and_gps(nlhs: list):
 
         print(f'\nTraining GP for {n_lhs} training points.')
         # generate the training points
-        class_sim = simulations(load_data=True, nlhs=n_lhs)
-        class_sim.precomputations(save=False)
-        class_sim.forward(save=True)
+        # class_sim = simulations(load_data=True, nlhs=n_lhs)
+        # class_sim.precomputations(save=False)
+        # class_sim.forward(save=True)
 
         # train the gps
         class_gp = Optimisation('simulations_' + str(n_lhs), n_lhs)
@@ -69,7 +69,6 @@ def main(emu: bool, method: str = 'first', fname: str = 'exact', var: bool = Fal
 
     # the method in lower case
     method = method.lower()
-
     sampling = MCMC(emulator=emu, method=method, variance=var)
 
     # generate the MCMC samples
