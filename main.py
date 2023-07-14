@@ -94,6 +94,6 @@ if __name__ == '__main__':
     # main(ARGS.emu, ARGS.method, ARGS.fname, ARGS.var)
 
     # NUM_LHS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    NUM_LHS = [200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    # train_and_gps(NUM_LHS)
+    NUM_LHS = [500] # [200, 300, 400, 500, 600, 700, 800, 900, 1000]
+    train_and_gps(NUM_LHS)
     mcmc_runs(NUM_LHS, 10000)
