@@ -29,14 +29,19 @@ class GaussianProcess(tr.PreWhiten):
         outputs: torch.tensor,
         jitter: float,
         xtrans: bool = True,
+        ytrans: bool = True,
     ):
         # store the relevant informations
-        self.ytrain_std = torch.std(outputs)
-        self.ytrain_mean = torch.mean(outputs)
-        self.ytrain = (outputs - self.ytrain_mean) / self.ytrain_std
-        self.ytrain = self.ytrain.view(-1, 1)
-        self.jitter = jitter
         self.xtrans = xtrans
+        self.ytrans = ytrans
+        if self.ytrans:
+            self.ytrain_std = torch.std(outputs)
+            self.ytrain_mean = torch.mean(outputs)
+            self.ytrain = (outputs - self.ytrain_mean) / self.ytrain_std
+            self.ytrain = self.ytrain.view(-1, 1)
+        else:
+            self.ytrain = outputs
+        self.jitter = jitter
 
         # get the dimensions of the inputs
         self.ndata, self.ndim = inputs.shape
@@ -196,7 +201,8 @@ class GaussianProcess(tr.PreWhiten):
 
         k_star = kn.compute(self.xtrain, testpoint, self.opt_parameters)
         mean = k_star.t() @ self.alpha
-        mean = mean * self.ytrain_std + self.ytrain_mean
+        if self.ytrans:
+            mean = mean * self.ytrain_std + self.ytrain_mean
         return mean.view(-1)
 
     def mean_var_prediction(
@@ -216,12 +222,14 @@ class GaussianProcess(tr.PreWhiten):
             testpoint = tr.PreWhiten.x_transformation(self, testpoint)
         k_star = kn.compute(self.xtrain, testpoint, self.opt_parameters.data)
         mean = k_star.t() @ self.alpha
-        mean = self.ytrain_std * mean + self.ytrain_mean
+        if self.ytrans:
+            mean = self.ytrain_std * mean + self.ytrain_mean
 
         if variance:
             k_star_star = kn.compute(testpoint, testpoint, self.opt_parameters.data)
             var = k_star_star - k_star.t() @ kn.solve(self.kernel_matrix, k_star)
-            var = self.ytrain_std**2 * var
+            if self.ytrans:
+                var = self.ytrain_std**2 * var
             return mean.view(-1), var.view(-1)
         return mean.view(-1)
 
